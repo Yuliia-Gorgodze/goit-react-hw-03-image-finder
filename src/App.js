@@ -5,7 +5,7 @@ import ImageGallery from './components/ImageGallery';
 import Modal from './components/Modal';
 import Button from './components/Button';
 import Loader from './components/Loader';
-import fetch from './services/fetchImg';
+import fetchImg from './services/fetchImg';
 
 class App extends Component {
   state = {
@@ -14,14 +14,15 @@ class App extends Component {
     modal: false,
     isLoading: false,
     linkModal: {},
-    page: 0,
+    page: 1,
+    button: true,
   };
+
   onSubmitForm = value => {
     if (value) {
       this.setState({ isLoading: true });
 
-      fetch
-        .fetchImages(value)
+      fetchImg(value, 1)
         .then(({ data }) => data.hits)
         .then(data =>
           this.setState({
@@ -29,6 +30,7 @@ class App extends Component {
             value: value,
             page: 2,
             isLoading: false,
+            button: data.length === 12,
           }),
         )
         .catch(error => console.error({ error }));
@@ -40,17 +42,23 @@ class App extends Component {
   loadMore = () => {
     const { value, page, images } = this.state;
     this.setState({ isLoading: true });
-    fetch
-      .loadMore(value, page)
+    fetchImg(value, page)
       .then(({ data }) => data.hits)
       .then(data =>
         this.setState({
           images: [...images, ...data],
           isLoading: false,
+          button: data.length === 12,
         }),
       );
     this.setState(state => {
       return { page: state.page + 1 };
+    });
+    window.scrollTo({
+      top:
+        document.documentElement.scrollTop +
+        document.documentElement.clientHeight,
+      behavior: 'smooth',
     });
   };
   showModal = img => {
@@ -82,7 +90,9 @@ class App extends Component {
             img={this.state.linkModal}
           />
         )}
-        {this.state.images.length !== 0 && <Button loadMore={this.loadMore} />}
+        {this.state.images.length !== 0 && this.state.button && (
+          <Button loadMore={this.loadMore} />
+        )}
         {this.state.isLoading && <Loader />}
       </div>
     );
