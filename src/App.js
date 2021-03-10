@@ -17,7 +17,14 @@ class App extends Component {
     page: 1,
     button: true,
   };
-
+  componentDidUpdate() {
+    window.scrollTo({
+      top:
+        document.documentElement.scrollTop +
+        document.documentElement.clientHeight,
+      behavior: 'smooth',
+    });
+  }
   onSubmitForm = value => {
     if (value) {
       this.setState({ isLoading: true });
@@ -53,12 +60,6 @@ class App extends Component {
       );
     this.setState(state => {
       return { page: state.page + 1 };
-    });
-    window.scrollTo({
-      top:
-        document.documentElement.scrollTop +
-        document.documentElement.clientHeight,
-      behavior: 'smooth',
     });
   };
   showModal = img => {
